@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
 #        self.lb.cellChanged.connect(self.listChanged)
 
         ### username field ###
-        self.uname = QLineEdit("Axel-Erfurt")
+        self.uname = QLineEdit("")
         self.uname.setFixedWidth(180)
         self.uname.setPlaceholderText("insert user name")
         self.uname.returnPressed.connect(self.listRepos)
@@ -132,13 +132,16 @@ class MainWindow(QMainWindow):
     ### get user repos ##
     def listRepos(self):
         self.changeUsername()
-        self.lb.setRowCount(0)
-        self.repoList = []
-        repositories = self.get_repositories()
-        print("%s %s" % ("get repos from", self.username))
-        self.repoList = list(repositories)
-        self.fillTable()
-        self.msg("repos loaded")
+        if  self.username == "":
+            self.msgBox("please type a username")
+        else:
+            self.lb.setRowCount(0)
+            self.repoList = []
+            repositories = self.get_repositories()
+            print("%s %s" % ("get repos from", self.username))
+            self.repoList = list(repositories)
+            self.fillTable()
+            self.msg("repos loaded")
 
     ### fill table with user repos
     def fillTable(self):
@@ -243,7 +246,7 @@ class MainWindow(QMainWindow):
 
     ### error messagebox
     def errorBox(self, message):
-       QMessageBox.warning(self, "Error", message).show()
+       mwin = QMessageBox.warning(self, "Error", message)
 
     ### messagebox
     def infobox(self,title, message):
@@ -252,6 +255,9 @@ class MainWindow(QMainWindow):
     ### set statusbar text
     def msg(self, message):
         self.statusbar.showMessage(message)
+
+    def msgBox(self, message):
+        msg = QMessageBox.warning(self, "Information", message)
 
     ### begin from git_clones ###
     def http_get(self):
@@ -286,3 +292,4 @@ if __name__ == '__main__':
     mainWin = MainWindow()
     mainWin.show()
     sys.exit(app.exec_())
+
