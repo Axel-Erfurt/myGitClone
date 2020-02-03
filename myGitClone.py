@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ### based on https://github.com/rootVIII/git_clones by James
 #########################################################################
-from PyQt5.QtCore import (QDir, QSettings, Qt, QMetaObject, QSize, QProcess)
+from PyQt5.QtCore import (QDir, QSettings, Qt, QMetaObject, QSize, QProcess, QFileInfo, QCoreApplication)
 from PyQt5.QtGui import QIcon, QKeySequence, QFont, QCursor
 from PyQt5.QtWidgets import (QAction, QApplication, QFileDialog, QMainWindow, QHBoxLayout, QMenu, 
                                                     QMessageBox, QWidget, QVBoxLayout, QPushButton, QLabel, QLineEdit, QCheckBox, 
@@ -18,6 +18,10 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setObjectName("myGitClone")
+        root = QFileInfo.path(QFileInfo(QCoreApplication.arguments()[0]))
+        print("root", root)
+        self.icon = QIcon(f"{root}/favicon.ico")
+        self.setWindowIcon(self.icon)
         self.setGeometry(0, 0, 800, 600)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setMinimumSize(400, 300)
@@ -35,7 +39,6 @@ class MainWindow(QMainWindow):
         ### shell settings
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.MergedChannels)
-#        self.process.readyRead.connect(self.dataReady)
         self.process.readyReadStandardError.connect(lambda: self.msg("Error"))
         self.process.started.connect(lambda: self.msg("starting shell"))
         self.process.finished.connect(lambda: self.msg("shell ended"))
@@ -55,7 +58,6 @@ class MainWindow(QMainWindow):
         self.lb.horizontalHeader().setStretchLastSection(True)
         self.lb.setHorizontalHeaderItem(0, QTableWidgetItem("Select"))
         self.lb.setHorizontalHeaderItem(1, QTableWidgetItem("Repository Name"))
-#        self.lb.cellChanged.connect(self.listChanged)
 
         ### username field ###
         self.uname = QLineEdit("")
@@ -64,23 +66,22 @@ class MainWindow(QMainWindow):
         self.uname.returnPressed.connect(self.listRepos)
 
         ### get repos button ###
-        self.uBtn = QPushButton("get Repos List")
-        self.uBtn.setFixedWidth(120)
+        self.uBtn = QPushButton(QIcon(self.icon), "get Repos List")
         self.uBtn.setToolTip("get all repos from user")
         self.uBtn.clicked.connect(self.listRepos)
 
         ### get repos button ###
-        self.dlBtn = QPushButton("download selected Repos")
-        self.dlBtn.setFixedWidth(160)
+        self.dlBtn = QPushButton(QIcon.fromTheme("download"), "download selected Repos")
         self.dlBtn.setToolTip("download selected repos from user")
+        self.dlBtn.setFixedWidth(180)
         self.dlBtn.clicked.connect(self.create_dl_list)
 
         ### Layout
         self.ubox = QHBoxLayout()
         self.ubox.addWidget(self.uname)
-        self.ubox.insertStretch(1)
         self.ubox.addWidget(self.uBtn)
-        self.ubox.addStretch()
+        self.ubox.addStretch(1)
+        self.ubox.addWidget(self.dlBtn)
 
     
         self.layout = QVBoxLayout()
@@ -88,7 +89,6 @@ class MainWindow(QMainWindow):
 
         self.layout.addLayout(self.ubox)
         self.layout.addWidget(self.lb)
-        self.layout.addWidget(self.dlBtn)
         self.wid.setLayout(self.layout)
 
         self.setCentralWidget(self.wid)
@@ -168,7 +168,6 @@ class MainWindow(QMainWindow):
 
     def listChanged(self):
         self.create_dl_list()
-#        print(self.gitList)
 
     ### get download list from selected repos
     def create_dl_list(self):
@@ -292,4 +291,3 @@ if __name__ == '__main__':
     mainWin = MainWindow()
     mainWin.show()
     sys.exit(app.exec_())
-
